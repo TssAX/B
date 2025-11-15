@@ -1,0 +1,555 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local whitelist = {
+    ["SadNii4"] = true,
+    ["82iwkwjw3"] = true,
+    ["EternaIKing_ofc"] = true,
+    ["EternalQueen_ofc"] = true,
+    ["OfEternal_king"] = true,
+    ["OfEternal_queen"] = true,
+    ["PROPLAYER292827"] = true,
+    ["ilvieharbor73"] = true,
+    ["TOQUIO_94"] = true,
+    ["TOQUIO_944"] = true,
+    ["ARMY_S0LDIER8"] = true,
+    ["dorrido13"] = true,
+    ["PEBUGADOTUTORIAL"] = true,
+    ["TheLittle8Prince"] = true,
+    ["Italo444hzx"] = true,
+    ["NOOB_SEUPESADELO"] = true,
+    ["Voa_Passarinho8"] = true,
+    ["SadNii0"] = true,
+    ["NeezXIX"] = true,
+    ["Nicke_Nii"] = true,
+    ["KillMachineFatality"] = true,
+    ["Kansas_Girl8"] = true,
+    ["Maveick01"] = true,
+    ["XXDuquesa_julianaXX"] = true,
+    ["User25"] = true,
+    ["User26"] = true,
+    ["User27"] = true,
+    ["User28"] = true,
+    ["User29"] = true,
+    ["User30"] = true,
+    ["User31"] = true,
+    ["User32"] = true,
+    ["User33"] = true,
+    ["User34"] = true,
+    ["User35"] = true,
+    ["User36"] = true,
+    ["User37"] = true,
+    ["User38"] = true,
+    ["User39"] = true
+}
+
+if not whitelist[LocalPlayer.Name] then
+    LocalPlayer:Kick("Voce nao esta na whitelist para usar este script.")
+    return
+end
+
+print("Usuario autorizado:", LocalPlayer.Name)
+
+game:GetService("Players").LocalPlayer.Idled:Connect(function()
+    game:GetService("VirtualUser"):Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+    wait(1)
+    game:GetService("VirtualUser"):Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+end)
+
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/8293733528373/63917387182828/refs/heads/main/7282728Q37262", true))()
+
+local window = library:AddWindow("Sad [Farming] - Strength", {
+    main_color = Color3.fromRGB(0, 0, 0),
+    min_size = Vector2.new(550, 600),
+    can_resize = false,
+})
+
+local tabFarming = window:AddTab("Farming")
+
+local player = game.Players.LocalPlayer
+local leaderstats = player:WaitForChild("leaderstats")
+local strengthStat = leaderstats:WaitForChild("Strength")
+local durabilityStat = player:WaitForChild("Durability")
+
+local function formatNumber(number)
+    local isNegative = number < 0
+    number = math.abs(number)
+
+    if number >= 1e15 then
+        local formatted = string.format("%.2fQa", number / 1e15)
+        return (isNegative and "-" or "") .. formatted
+    elseif number >= 1e12 then
+        local formatted = string.format("%.2fT", number / 1e12)
+        return (isNegative and "-" or "") .. formatted
+    elseif number >= 1e9 then
+        local formatted = string.format("%.2fB", number / 1e9)
+        return (isNegative and "-" or "") .. formatted
+    elseif number >= 1e6 then
+        local formatted = string.format("%.2fM", number / 1e6)
+        return (isNegative and "-" or "") .. formatted
+    elseif number >= 1e3 then
+        local formatted = string.format("%.2fK", number / 1e3)
+        return (isNegative and "-" or "") .. formatted
+    else
+        if number % 1 == 0 then
+            return (isNegative and "-" or "") .. string.format("%.0f", number)
+        else
+            return (isNegative and "-" or "") .. string.format("%.2f", number)
+        end
+    end
+end
+
+local timeLabel = tabFarming:AddLabel("Session Time:")
+timeLabel.TextSize = 24
+
+local stopwatchLabel = tabFarming:AddLabel("0d 0h 0m 0s")
+stopwatchLabel.TextSize = 20
+
+tabFarming:AddLabel("").TextSize = 10
+
+local projectedStrengthLabel = tabFarming:AddLabel("Strength Pace: 0 /Hour  0 /Day")
+projectedStrengthLabel.TextSize = 20
+
+local projectedDurabilityLabel = tabFarming:AddLabel("Durability Pace: 0 /Hour  0 /Day")
+projectedDurabilityLabel.TextSize = 20
+
+tabFarming:AddLabel("").TextSize = 10
+
+local strengthLabel = tabFarming:AddLabel("Strength: 0   Gained: 0")
+strengthLabel.TextSize = 20
+
+local durabilityLabel = tabFarming:AddLabel("Durability: 0   Gained: 0")
+durabilityLabel.TextSize = 20
+
+local startTime = tick()
+local initialStrength = strengthStat.Value
+local initialDurability = durabilityStat.Value
+
+task.spawn(function()
+    local lastUpdate = 0
+
+    while true do
+        local currentTime = tick()
+        local elapsedTime = currentTime - startTime
+        local days = math.floor(elapsedTime / (24 * 3600))
+        local hours = math.floor((elapsedTime % (24 * 3600)) / 3600)
+        local minutes = math.floor((elapsedTime % 3600) / 60)
+        local seconds = math.floor(elapsedTime % 60)
+
+        stopwatchLabel.Text = string.format("%dd %dh %dm %ds", days, hours, minutes, seconds)
+
+        local currentStrength = strengthStat.Value
+        local currentDurability = durabilityStat.Value
+
+        local sessionStrengthDelta = currentStrength - initialStrength
+        local sessionDurabilityDelta = currentDurability - initialDurability
+
+        strengthLabel.Text = "Strength: " .. formatNumber(currentStrength) .. "         Gained: " .. formatNumber(sessionStrengthDelta)
+        durabilityLabel.Text = "Durability: " .. formatNumber(currentDurability) .. "         Gained: " .. formatNumber(sessionDurabilityDelta)
+
+        if currentTime - lastUpdate >= 6 then
+            lastUpdate = currentTime
+
+            local strengthPerSecond = sessionStrengthDelta / elapsedTime
+            local durabilityPerSecond = sessionDurabilityDelta / elapsedTime
+
+            local secondsPerHour = 3600
+            local secondsPerDay = 86400
+
+            local strengthPerHour = math.floor(strengthPerSecond * secondsPerHour)
+            local durabilityPerHour = math.floor(durabilityPerSecond * secondsPerHour)
+
+            local projectedStrength = math.floor(strengthPerSecond * secondsPerDay)
+            local projectedDurability = math.floor(durabilityPerSecond * secondsPerDay)
+
+            projectedStrengthLabel.Text = "Strength Pace: " .. formatNumber(strengthPerHour) .. "/Hour     " .. formatNumber(projectedStrength) .. "/Day"
+            projectedDurabilityLabel.Text = "Durability Pace: " .. formatNumber(durabilityPerHour) .. "/Hour     " .. formatNumber(projectedDurability) .. "/Day"
+        end
+        task.wait(0.05)
+    end
+end)
+
+local nothingLabel = tabFarming:AddLabel("")
+
+tabFarming:AddLabel("Fast Farming").TextSize = 23
+
+local player = game.Players.LocalPlayer
+local muscleEvent = player:WaitForChild("muscleEvent")
+local runFastRep = false
+local repsPerTick = 1
+
+local function getPing()
+    local stats = game:GetService("Stats")
+    local pingStat = stats:FindFirstChild("PerformanceStats") and stats.PerformanceStats:FindFirstChild("Ping")
+    return pingStat and pingStat:GetValue() or 0
+end
+
+tabFarming:AddTextBox("Rep Speed", function(value)
+    local num = tonumber(value)
+    if num and num > 0 then
+        repsPerTick = math.floor(num)
+    end
+end, {
+    placeholder = "1",
+})
+
+local function fastRepLoop()
+    while runFastRep do
+        local startTime = tick()
+        while tick() - startTime < 0.75 and runFastRep do
+            for i = 1, repsPerTick do
+                muscleEvent:FireServer("rep")
+            end
+            task.wait(0.02)
+        end
+
+        while runFastRep and getPing() >= 100 do
+            task.wait(1)
+        end
+    end
+end
+
+tabFarming:AddSwitch("Fast Rep", function(state)
+    runFastRep = state
+    if runFastRep then
+        task.spawn(fastRepLoop)
+    else
+        print("")
+    end
+end)
+
+tabFarming:AddLabel("Useful").TextSize = 23
+
+tabFarming:AddSwitch("Auto Fortune Wheel", function(Value)
+    _G.autoFortuneWheelActive = Value
+    if Value then
+        local function openFortuneWheel()
+            while _G.autoFortuneWheelActive do
+                local args = {
+                    [1] = "openFortuneWheel",
+                    [2] = game:GetService("ReplicatedStorage"):WaitForChild("fortuneWheelChances"):WaitForChild("Fortune Wheel")
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("rEvents"):WaitForChild("openFortuneWheelRemote"):InvokeServer(unpack(args))
+                wait(0)
+            end
+        end
+        coroutine.wrap(openFortuneWheel)()
+    else
+        _G.autoFortuneWheelActive = false
+    end
+end)
+
+local autoEatBoostsEnabled = false
+
+local boostsList = {
+    "ULTRA Shake",
+    "TOUGH Bar",
+    "Protein Shake",
+    "Energy Shake",
+    "Protein Bar",
+    "Energy Bar",
+    "Tropical Shake"
+}
+
+local function eatAllBoosts()
+    local player = game.Players.LocalPlayer
+    local backpack = player:WaitForChild("Backpack")
+    local character = player.Character or player.CharacterAdded:Wait()
+
+    for _, boostName in ipairs(boostsList) do
+        local boost = backpack:FindFirstChild(boostName)
+        while boost do
+            boost.Parent = character
+            pcall(function()
+                boost:Activate()
+            end)
+            task.wait(0)
+            boost = backpack:FindFirstChild(boostName)
+        end
+    end
+end
+
+task.spawn(function()
+    while true do
+        if autoEatBoostsEnabled then
+            eatAllBoosts()
+            task.wait(2)
+        else
+            task.wait(1)
+        end
+    end
+end)
+
+tabFarming:AddSwitch("Auto Clear Inventory", function(state)
+    autoEatBoostsEnabled = state
+end)
+
+local autoDrinkEnabled = false
+
+local function drinkTropicalShake()
+    local player = game.Players.LocalPlayer
+    local backpack = player:WaitForChild("Backpack")
+
+    local shake = backpack:FindFirstChild("Tropical Shake")
+    if not shake then
+        for _, item in pairs(backpack:GetChildren()) do
+            if item.Name:find("Tropical") and item.Name:find("Shake") then
+                shake = item
+                break
+            end
+        end
+    end
+    
+    if shake then
+        local character = player.Character or player.CharacterAdded:Wait()
+        shake.Parent = character
+        pcall(function()
+            shake:Activate()
+        end)
+        return true
+    end
+    return false
+end
+
+task.spawn(function()
+    while true do
+        if autoDrinkEnabled then
+            drinkTropicalShake()
+            task.wait(0.5)
+        else
+            task.wait(1)
+        end
+    end
+end)
+
+tabFarming:AddSwitch("Auto Tropical Shake", function(state)
+    autoDrinkEnabled = state
+end)
+
+local autoEatEnabled = false
+local lastEggTime = 0
+
+local function countProteinEggs()
+    local player = game.Players.LocalPlayer
+    local backpack = player:WaitForChild("Backpack")
+    local character = player.Character
+    
+    local eggCount = 0
+    
+    for _, item in pairs(backpack:GetChildren()) do
+        if item.Name == "Protein Egg" then
+            eggCount = eggCount + 1
+        end
+    end
+    
+    if character then
+        for _, item in pairs(character:GetChildren()) do
+            if item.Name == "Protein Egg" then
+                eggCount = eggCount + 1
+            end
+        end
+    end
+    
+    return eggCount
+end
+
+local function hasActiveEgg()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    
+    for _, child in pairs(character:GetChildren()) do
+        if child.Name == "ProteinEggEffect" or child.Name:find("ProteinEgg") or child.Name:find("EggBuff") then
+            return true
+        end
+    end
+    return false
+end
+
+local function eatProteinEgg()
+    local player = game.Players.LocalPlayer
+    local backpack = player:WaitForChild("Backpack")
+    
+    if hasActiveEgg() then
+        lastEggTime = tick()
+        return false
+    end
+    
+    if countProteinEggs() <= 2 then
+        return false
+    end
+    
+    local egg = backpack:FindFirstChild("Protein Egg")
+    if egg then
+        local character = player.Character or player.CharacterAdded:Wait()
+        egg.Parent = character
+        pcall(function()
+            egg:Activate()
+        end)
+        lastEggTime = tick()
+        return true
+    end
+    return false
+end
+
+task.spawn(function()
+    while true do
+        if autoEatEnabled then
+            local eggCount = countProteinEggs()
+            
+            if eggCount > 2 and not hasActiveEgg() and tick() - lastEggTime >= 1800 then
+                eatProteinEgg()
+            end
+            
+            task.wait(5)
+        else
+            task.wait(1)
+        end
+    end
+end)
+
+tabFarming:AddSwitch("Auto Egg", function(state)
+    autoEatEnabled = state
+end)
+
+tabFarming:AddSwitch("Hide Pop Ups", function(bool)
+    getgenv().autoFarmEnabled = bool
+    
+    local rSto = game:GetService("ReplicatedStorage")
+    for _, obj in pairs(rSto:GetChildren()) do
+        if obj.Name:match("Frame$") then
+            obj.Visible = not bool
+        end
+    end
+    
+    local VIM = game:GetService("VirtualInputManager")
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+    
+    local function pressE()
+        VIM:SendKeyEvent(true, "E", false, game)
+        task.wait(0.1)
+        VIM:SendKeyEvent(false, "E", false, game)
+    end
+    
+    local function autoLift()
+        while getgenv().autoFarmEnabled do
+            LocalPlayer.muscleEvent:FireServer("rep")
+            task.wait()
+        end
+    end
+    
+    local function teleportAndStart(position)
+        local character = LocalPlayer.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            character.HumanoidRootPart.CFrame = position
+            task.wait(0.1)
+            pressE()
+            task.spawn(autoLift)
+        end
+    end
+    
+    if bool then
+        teleportAndStart(CFrame.new(-8352, 34, 2878))
+    else
+    end
+end)
+
+tabFarming:AddButton("Anti Lag", function()
+    local player = game.Players.LocalPlayer
+    local playerGui = player:WaitForChild("PlayerGui")
+    local lighting = game:GetService("Lighting")
+
+    for _, gui in pairs(playerGui:GetChildren()) do
+        if gui:IsA("ScreenGui") then
+            gui:Destroy()
+        end
+    end
+
+    local function darkenSky()
+        for _, v in pairs(lighting:GetChildren()) do
+            if v:IsA("Sky") then
+                v:Destroy()
+            end
+        end
+
+        local darkSky = Instance.new("Sky")
+        darkSky.Name = "DarkSky"
+        darkSky.SkyboxBk = "rbxassetid://0"
+        darkSky.SkyboxDn = "rbxassetid://0"
+        darkSky.SkyboxFt = "rbxassetid://0"
+        darkSky.SkyboxLf = "rbxassetid://0"
+        darkSky.SkyboxRt = "rbxassetid://0"
+        darkSky.SkyboxUp = "rbxassetid://0"
+        darkSky.Parent = lighting
+
+        lighting.Brightness = 0
+        lighting.ClockTime = 0
+        lighting.TimeOfDay = "00:00:00"
+        lighting.OutdoorAmbient = Color3.new(0, 0, 0)
+        lighting.Ambient = Color3.new(0, 0, 0)
+        lighting.FogColor = Color3.new(0, 0, 0)
+        lighting.FogEnd = 100
+
+        task.spawn(function()
+            while true do
+                wait(5)
+                if not lighting:FindFirstChild("DarkSky") then
+                    darkSky:Clone().Parent = lighting
+                end
+                lighting.Brightness = 0
+                lighting.ClockTime = 0
+                lighting.OutdoorAmbient = Color3.new(0, 0, 0)
+                lighting.Ambient = Color3.new(0, 0, 0)
+                lighting.FogColor = Color3.new(0, 0, 0)
+                lighting.FogEnd = 100
+            end
+        end)
+    end
+
+    local function removeParticleEffects()
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("ParticleEmitter") then
+                obj:Destroy()
+            end
+        end
+    end
+
+    local function removeLightSources()
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+                obj:Destroy()
+            end
+        end
+    end
+
+    removeParticleEffects()
+    removeLightSources()
+    darkenSky()
+end)
+
+tabFarming:AddLabel("Pets").TextSize = 23
+
+tabFarming:AddButton("Equip Swift Samurai", function()
+    local petsFolder = game.Players.LocalPlayer.petsFolder
+
+    for _, folder in pairs(petsFolder:GetChildren()) do
+        if folder:IsA("Folder") then
+            for _, pet in pairs(folder:GetChildren()) do
+                game:GetService("ReplicatedStorage").rEvents.equipPetEvent:FireServer("unequipPet", pet)
+            end
+        end
+    end
+    task.wait(0.2)
+
+    local petsToEquip = {}
+    for _, pet in pairs(petsFolder.Unique:GetChildren()) do
+        if pet.Name == "Swift Samurai" then
+            table.insert(petsToEquip, pet)
+        end
+    end
+
+    for i = 1, math.min(8, #petsToEquip) do
+        game:GetService("ReplicatedStorage").rEvents.equipPetEvent:FireServer("equipPet", petsToEquip[i])
+        task.wait(0.1)
+    end
+end)
